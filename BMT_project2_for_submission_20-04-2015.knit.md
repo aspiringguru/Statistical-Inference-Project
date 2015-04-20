@@ -1,5 +1,6 @@
 ---
-title: "Statistical Inference : Project"
+title: 'Statistical Inference : Project'
+output: pdf_document
 date: "20th April 2015"
 ---
 
@@ -7,25 +8,10 @@ date: "20th April 2015"
 
 This report analyzes the ToothGrowth data in the R datasets package. 
 
-```{r load libraries, echo=FALSE, error = FALSE, message = FALSE}
-## load libraries
-library(datasets)
-library(ggplot2)
-library(plyr)
-library(dplyr)
-```
+
 
 Inspection of the data identifies the size of the dataset, names of variables, type of data and which data fields are categorical.
-```{r Quick inspection of data, echo=FALSE, message = FALSE, results="hide"}
-dim(ToothGrowth) 
-names(ToothGrowth) 
-lapply(ToothGrowth,class) 
-mydata<-group_by(ToothGrowth, supp, dose)
-summary(mydata)
-summary(factor(mydata$dose))
-summary(factor(mydata$supp))
-str(ToothGrowth)
-```
+
 
 Inpsection of the data tells us  
 1. 60 observations are recorded.  
@@ -37,34 +23,9 @@ Inpsection of the data tells us
 	+ "VC" = Ascorbic Acid  
 3. There are three dosage levels used. (0.5, 1, 2)
 
-```{r Summary table for analysis, echo=FALSE, message = FALSE, results="hide"}
-## generate a table of summary data showing mean, std dev, std error & confidence interval for each combination of dosage and additive. 
-toothSummary <- ddply(ToothGrowth, 
-            c("dose", "supp"), summarise, 
-            N=length(len), 
-            meanLength=mean(len), 
-            sd=sd(len), 
-            se=sd/sqrt(N), 
-            upperCI=meanLength+qnorm(0.975)*sd/sqrt(N), 
-            lowerCI=meanLength+(-1)*qnorm(0.975)*sd/sqrt(N))
 
-toothSummary$meanLength <- round(toothSummary$meanLength, 1)
-toothSummary$sd <- round(toothSummary$sd, 1)
-toothSummary$se <- round(toothSummary$se, 1)
-toothSummary$upperCI <- round(toothSummary$upperCI, 1)
-toothSummary$lowerCI <- round(toothSummary$lowerCI, 1)
-toothSummary
-```
 
-```{r Quick simple table, echo=FALSE, message = FALSE, results="hide"}
-## alternate method to produce summary table - does not calc confidence intervals
-attach(ToothGrowth)
-temp1 <- aggregate(len, list(supp, dose), FUN=function(x) round(c(mean = mean(x), med = median(x), sd = sd(x)),1))
-colnames(temp1) <- c("supp","dose","len")
-temp1 <- subset(temp1, select=c(dose, supp, len))
-temp1
-detach(ToothGrowth) ## free memory and variable name
-```
+
 
 Plot 1 shows three levels of dosage, statistical analysis is needed to show how dosage is related to growth rate and the confidence levels of any proposed conclusions.  
 
@@ -77,29 +38,44 @@ Plot 2 (refer Appendix) shows us the following.
 
 Testing hyposis using t.test at the default 95% confidence level.  
 H null : There is no difference in tooth growth between dosage = 0.5mg & 1.0mg  
-```{r hypothesis test 0.5-1.0, echo=TRUE}
+
+```r
 temp1 <- subset(ToothGrowth, dose==0.5 | dose ==1)
 ts <- t.test(temp1$len ~ temp1$dose)
 ts$conf.int[1:2]
+```
+
+```
+## [1] -11.983781  -6.276219
 ```
 Confidence interval does not include zero. 
 The Alternate Hypothesis is true : The difference in means is not equal to 0.  
 
 
 H null : There is no difference in tooth growth between dosage = 0.5mg & 2.0mg.  
-```{r hypothesis test 0.5-2.0, echo=TRUE}
+
+```r
 temp1 <- subset(ToothGrowth, dose==0.5 | dose ==2)
 ts <- t.test(temp1$len ~ temp1$dose)
 ts$conf.int[1:2]
+```
+
+```
+## [1] -18.15617 -12.83383
 ```
 Confidence interval does not include zero.  
 The Alternate Hypothesis is true : The difference in means is not equal to 0.  
 
 H null : There is no difference in tooth growth between dosage = 1.0mg & 2.0mg.  
-```{r hypothesis test 1.0-2.0, echo=TRUE}
+
+```r
 temp1 <- subset(ToothGrowth, dose==0.5 | dose ==2)
 ts <- t.test(temp1$len ~ temp1$dose)
 ts$conf.int[1:2]
+```
+
+```
+## [1] -18.15617 -12.83383
 ```
 Confidence interval does not include zero. 
 The Alternate Hypothesis is true : The difference in means is not equal to 0.  
@@ -108,36 +84,56 @@ From the Hypothesis tests above we can conclude Tooth Growth increases with dosa
 
 Now test the hypothesis that Orange Juice results in different tooth growth than Ascorbic Acid.  
 H0 : There is no difference in tooth growth between Orange Juice and Ascorbic Acid.  
-```{r hypothesis test Supplements, echo=TRUE}
+
+```r
 t.test(ToothGrowth$len ~ ToothGrowth$supp)$conf.int[1:2]
+```
+
+```
+## [1] -0.1710156  7.5710156
 ```
 Confidence Interval does include zero. Failed to reject the null hypothesis.  
 We conclude that across all dosage rates, there is no significant difference in tooth growth rates from  Ascorbic Acid or Orange Juice.  
 
 Hnull = There is no difference in tooth growth rates at 0.5mg for different supplements.  
-```{r hypothesis test 0.5 supplement, echo=TRUE}
+
+```r
 temp1 <- subset(ToothGrowth, dose==0.5)
 t.test(temp1$len ~ temp1$supp)$conf.int[1:2]
+```
+
+```
+## [1] 1.719057 8.780943
 ```
 Confidence interval does not include zero.  
 Alternate hypothesis (difference in means is non zero for different supplements @ 0.5mg) is True.  
 
 Hnull = There is no difference in tooth growth rates at 1.0mg for different supplements.  
-```{r hypothesis test 1.0 Supplement, echo=TRUE}
+
+```r
 temp1 <- subset(ToothGrowth, dose==1.0)
 t.test(temp1$len ~ temp1$supp)$conf.int[1:2]
+```
+
+```
+## [1] 2.802148 9.057852
 ```
 Confidence interval does not include zero.  
 Alternate hypothesis (difference in means is non zero for different supplements @ 1.0mg) is True.  
 
 Hnull = There is no difference in tooth growth rates at 2.0mg for different supplements.  
-```{r hypothesis test 2.0 Supplement, echo=TRUE}
+
+```r
 temp1 <- subset(ToothGrowth, dose==2.0)
 t.test(temp1$len ~ temp1$supp)$conf.int[1:2]
 ```
+
+```
+## [1] -3.79807  3.63807
+```
 Confidence interval _does_ include zero.  
 Null hypothesis (difference in means is zero for different supplements @ 1.0mg) is True.  
-
+*****
 
 ## Conclusions  
 Statistical analysis of the data has proven the following with 95% confidence.  
@@ -146,23 +142,25 @@ Statistical analysis of the data has proven the following with 95% confidence.
 * At 0.5mg & 1.0mg dosage, there is a difference in tooth growth rates for Ascorbic Acid and Orange Juice.  
 * At 2.0mg dosage there is no difference in the tooth growth rates for Ascorbic Acid and Orange Juice.  
 
-*****
-[pagebreak for Appendix]
 
 ## Appendix A  
 
 ### Plots  
 
 Plot 1  
-```{r Quick simple plot, echo=TRUE, fig.width=10, fig.height=5}
+
+```r
 ## plot using panels to produce a plot for each supplement type.
 g <- ggplot(ToothGrowth, aes(dose, len))
 g + geom_point() + facet_grid(. ~ supp)
 ```
 
+![](BMT_project2_for_submission_20-04-2015_files/figure-latex/Quick simple plot-1.pdf) 
+
 
 Plot 2  
-```{r Plot for analysis, echo=TRUE, fig.width=10, fig.height=5}
+
+```r
 ## Plotting using boxplot
 ## function to label the plot facets for readability.
 facet_names <- list('OJ'="Orange Juice", 'VC'="Ascorbic Acid")
@@ -183,6 +181,8 @@ ggtitle("Tooth Growth vs Supplement Doses")
 ## scale_fill_discrete : sets legend title.
 g  
 ```
+
+![](BMT_project2_for_submission_20-04-2015_files/figure-latex/Plot for analysis-1.pdf) 
 
 
 ### Assumptions  
