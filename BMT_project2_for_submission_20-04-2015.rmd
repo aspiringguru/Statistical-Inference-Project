@@ -66,38 +66,9 @@ temp1
 detach(ToothGrowth) ## free memory and variable name
 ```
 
-```{r Quick simple plot, echo=TRUE, fig.width=10, fig.height=5}
-## plot using panels to produce a plot for each supplement type.
-g <- ggplot(ToothGrowth, aes(dose, len))
-g + geom_point() + facet_grid(. ~ supp)
-```
-  
-This simple plot shows three levels of dosage, statistical analysis is needed to show how dosage is related to growth rate and the confidence levels of any proposed conclusions.  
+Plot 1 shows three levels of dosage, statistical analysis is needed to show how dosage is related to growth rate and the confidence levels of any proposed conclusions.  
 
-
-```{r Plot for analysis, echo=TRUE, fig.width=10, fig.height=5}
-## Plotting using boxplot
-## function to label the plot facets for readability.
-facet_names <- list('OJ'="Orange Juice", 'VC'="Ascorbic Acid")
-facet_labeller <- function(variable,value){ return(facet_names[value]) }
-## NB : factor of dose required because ggplot requires factor (dose is numeric)
-g <- ggplot(ToothGrowth, aes(factor(dose), len, fill = factor(dose))) +
-scale_fill_discrete(name="Dosage (mg)") + 
-geom_boxplot(outlier.colour = "red",outlier.shape = 23, outlier.size = 5) +
-geom_jitter(position=position_jitter(w=0.2)) +
-facet_grid(.~supp, labeller=facet_labeller) +
-ylab("Tooth Growth") +
-xlab("Dose (mg)")+
-ggtitle("Tooth Growth vs Supplement Doses")
-## fill = factor(dose) : fills in boxplot with colour coding, easy to read graph
-## geom_jitter - jitters points so we can see overlapping points. w=0.2 sets width of jitter.
-## outlier - set properties so we can see points outside the values shown by the boxplot 
-## facet_grid - plot separate panels for each value of supp. ("OJ" &" "VC")
-## scale_fill_discrete : sets legend title.
-g  
-```
-
-The plot shows us the following.  
+Plot 2 (refer Appendix) shows us the following.  
 * at low (0.5mg) and medium (1mg) doses more tooth growth is observed with Orange Juice than with ascorbic acid.  
 * at high (2mg) doses the variance in tooth grown observed is higher with ascorbic acid than with Orange Juice.  
 * In both cases higher doses indicate higher tooth growth.  
@@ -166,7 +137,7 @@ t.test(temp1$len ~ temp1$supp)$conf.int[1:2]
 ```
 Confidence interval _does_ include zero.  
 Null hypothesis (difference in means is zero for different supplements @ 1.0mg) is True.  
-
+*****
 
 ## Conclusions  
 Statistical analysis of the data has proven the following with 95% confidence.  
@@ -176,7 +147,43 @@ Statistical analysis of the data has proven the following with 95% confidence.
 * At 2.0mg dosage there is no difference in the tooth growth rates for Ascorbic Acid and Orange Juice.  
 
 
-## Appendix A
+## Appendix A  
+
+### Plots  
+
+Plot 1  
+```{r Quick simple plot, echo=TRUE, fig.width=10, fig.height=5}
+## plot using panels to produce a plot for each supplement type.
+g <- ggplot(ToothGrowth, aes(dose, len))
+g + geom_point() + facet_grid(. ~ supp)
+```
+
+
+Plot 2  
+```{r Plot for analysis, echo=TRUE, fig.width=10, fig.height=5}
+## Plotting using boxplot
+## function to label the plot facets for readability.
+facet_names <- list('OJ'="Orange Juice", 'VC'="Ascorbic Acid")
+facet_labeller <- function(variable,value){ return(facet_names[value]) }
+## NB : factor of dose required because ggplot requires factor (dose is numeric)
+g <- ggplot(ToothGrowth, aes(factor(dose), len, fill = factor(dose))) +
+scale_fill_discrete(name="Dosage (mg)") + 
+geom_boxplot(outlier.colour = "red",outlier.shape = 23, outlier.size = 5) +
+geom_jitter(position=position_jitter(w=0.2)) +
+facet_grid(.~supp, labeller=facet_labeller) +
+ylab("Tooth Growth") +
+xlab("Dose (mg)")+
+ggtitle("Tooth Growth vs Supplement Doses")
+## fill = factor(dose) : fills in boxplot with colour coding, easy to read graph
+## geom_jitter - jitters points so we can see overlapping points. w=0.2 sets width of jitter.
+## outlier - set properties so we can see points outside the values shown by the boxplot 
+## facet_grid - plot separate panels for each value of supp. ("OJ" &" "VC")
+## scale_fill_discrete : sets legend title.
+g  
+```
+
+
+### Assumptions  
 The Analysis are based on the following assumptions.  
 * The variances of each test group are different. (ie: var.equal = FALSE)  
 * The test subjects are not related, ie: each test subject was tested with either Orange Juice or Ascorbic Acid.  
